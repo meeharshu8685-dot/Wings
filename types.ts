@@ -9,6 +9,37 @@ export interface PlanningDirection {
   lockedUntil: string;
 }
 
+// ===== MENTOR IDEAS: NEW TYPES =====
+
+// Daily Non-Negotiable (DNN) - Rules, not tasks
+export interface DailyRule {
+  rule: string;
+  completed: boolean;
+  dateSet: string;
+  type: 'STANDARD' | 'BOREDOM'; // Boredom Training is a special rule type
+}
+
+// Energy-First Task Selection
+export interface EnergySignals {
+  lastSessionLength: number; // minutes from last completed session
+  lastSessionDate: string | null;
+  recentMisses: number; // count of misses in last 7 days
+}
+
+// Boredom Training
+export interface BoredomTraining {
+  lastSession: string | null; // ISO date of last session
+  sessionsThisWeek: number;
+  weekStart: string; // ISO date of current week's Monday
+}
+
+// Weekly Reality Check
+export interface WeeklyCheck {
+  weekOf: string; // ISO date of Monday of the week
+  answeredOn: string | null; // ISO date when answered
+  showedUpMoreThanDisappeared: boolean | null;
+}
+
 export interface PlanningState {
   directions: PlanningDirection[];
   timeBudget: number; // minutes
@@ -68,6 +99,7 @@ export interface Settings {
   maintenanceMode: boolean;
   growthMode: boolean;
   planningMode: boolean;
+  hardStopActive: boolean; // Hard Stop After Completion
 }
 
 // GROWTH MODE: The memory layer of the system.
@@ -79,17 +111,21 @@ export interface GrowthState {
 }
 
 export interface WingsState {
-  version: "4.0";
+  version: "5.0"; // Version bump for new features
   level: WingsLevel;
   capacity: CapacityState;
   identity: WingsIdentity;
   daily: DailyLog;
+  dailyRule: DailyRule | null; // Current day's non-negotiable rule
   momentum: Momentum;
   selfTrust: SelfTrust;
   weeklyReports: WeeklyReport[];
+  weeklyChecks: WeeklyCheck[]; // Weekly Reality Check history
   settings: Settings;
   growth: GrowthState;
   planning: PlanningState;
+  energy: EnergySignals; // Energy-First Selection
+  boredomTraining: BoredomTraining; // Boredom Training state
 }
 
 export type ViewState = 'GOAL' | 'FLIGHT' | 'MOMENTUM' | 'PRESSURE' | 'SETTINGS' | 'FAILURE' | 'CONTROL_PANEL' | 'PLANNING';

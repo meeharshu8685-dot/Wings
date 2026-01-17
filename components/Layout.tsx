@@ -7,6 +7,8 @@ interface LayoutProps {
   children: ReactNode;
   currentView: ViewState;
   onChangeView: (view: ViewState) => void;
+  canGoBack?: boolean;
+  onGoBack?: () => void;
 }
 
 const NavButton = ({
@@ -46,7 +48,7 @@ const NavButton = ({
   </button>
 );
 
-export const Layout: React.FC<LayoutProps> = ({ children, currentView, onChangeView }) => {
+export const Layout: React.FC<LayoutProps> = ({ children, currentView, onChangeView, canGoBack, onGoBack }) => {
   const { level, momentum, settings } = useWingsStore();
 
   const showAdvancedNav = level >= 2;
@@ -81,7 +83,19 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentView, onChangeV
         </AnimatePresence>
       </main>
 
-      <nav className="mb-10 px-4 py-2 glass rounded-3xl flex space-x-1">
+      <nav className="mb-10 px-4 py-2 glass rounded-3xl flex items-center space-x-1">
+
+        {/* Back Button */}
+        {canGoBack && onGoBack && (
+          <button
+            onClick={onGoBack}
+            className="p-3 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-white/40 transition-all mr-2"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="m15 18-6-6 6-6" />
+            </svg>
+          </button>
+        )}
 
         {showFlightNav && (
           <NavButton active={currentView === 'GOAL'} onClick={() => onChangeView('GOAL')} label="Lock"
