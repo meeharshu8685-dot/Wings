@@ -6,6 +6,7 @@ import { Momentum } from './screens/Momentum';
 import { TimePressure } from './screens/TimePressure';
 import { WeeklyReportModal } from './screens/WeeklyReport';
 import { Settings } from './screens/Settings';
+import { ControlPanel } from './screens/ControlPanel';
 import { Failure } from './screens/Failure';
 import { useWingsStore } from './store/useWingsStore';
 import { ViewState } from './types';
@@ -28,7 +29,7 @@ function App() {
       setCurrentView('FLIGHT');
     }
     if (level < 3 && (currentView === 'PRESSURE' || currentView === 'GOAL')) {
-       setCurrentView('FLIGHT');
+      setCurrentView('FLIGHT');
     }
   }, [level, currentView]);
 
@@ -39,6 +40,7 @@ function App() {
       case 'MOMENTUM': return <Momentum />;
       case 'PRESSURE': return <TimePressure />;
       case 'SETTINGS': return <Settings />;
+      case 'CONTROL_PANEL': return <ControlPanel />;
       case 'FAILURE': return <Failure onChangeView={setCurrentView} />;
       default: return <FlightDeck />;
     }
@@ -49,7 +51,7 @@ function App() {
       <Layout currentView={currentView} onChangeView={setCurrentView}>
         {renderScreen()}
       </Layout>
-      
+
       {showWeeklyReport && (
         <WeeklyReportModal onClose={() => setShowWeeklyReport(false)} />
       )}

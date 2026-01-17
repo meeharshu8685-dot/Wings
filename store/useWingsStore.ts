@@ -39,7 +39,7 @@ const _calculateCapacity = (dailyLog: DailyLog): { capacity: CapacityState, hist
   const history: boolean[] = [];
   let showUps = 0;
   let totalTime = 0;
-  
+
   for (let i = 0; i < 7; i++) {
     const d = new Date();
     d.setDate(d.getDate() - i);
@@ -52,7 +52,7 @@ const _calculateCapacity = (dailyLog: DailyLog): { capacity: CapacityState, hist
       totalTime += day.timeSpent;
     }
   }
-  
+
   const avgTime = showUps > 0 ? totalTime / showUps : 0;
   if (showUps < 3) return { capacity: 'FRAGILE', history };
   if (showUps <= 5 && avgTime < 20) return { capacity: 'STABLE', history };
@@ -82,7 +82,16 @@ const INITIAL_STATE: WingsState = {
   momentum: { currentStreak: 0, longestStreak: 0, lastMissedDate: null, lastHardModeFailure: null, totalDaysFlown: 0, showUpHistory: Array(7).fill(false) },
   selfTrust: { promisesMade: 0, promisesKept: 0 },
   weeklyReports: [],
-  settings: { motion: "full", hardMode: false },
+  settings: {
+    motion: "full",
+    hardMode: false,
+    stateOverride: 'AUTO',
+    antiDopamine: false,
+    focusLock: false,
+    explorationMode: false,
+    maintenanceMode: false,
+    growthMode: true
+  },
   growth: INITIAL_GROWTH_STATE
 };
 
@@ -91,11 +100,22 @@ export const useWingsStore = create<WingsState & WingsActions>()(
     (set, get) => ({
       ...INITIAL_STATE,
       setLongTermGoal: (goal) => set((state) => ({ identity: { ...state.identity, longTermGoal: goal } })),
-      lockGoal: () => set((state) => ({ identity: { ...state.identity, lockedUntil: addDays(getTodayISO(), 90) }})),
+      lockGoal: () => set((state) => ({ identity: { ...state.identity, lockedUntil: addDays(getTodayISO(), 90) } })),
       generateGroundTask: () => set((state) => {
         const today = getTodayISO();
         if (state.daily[today]) return state;
-        const task = GROUND_PROTOCOLS[state.momentum.totalDaysFlown % GROUND_PROTOCOLS.length];
+
+        // Anti-Dopamine: only restorative/phone-free tasks
+        // For simplicity, we assume GROUND_PROTOCOLS are already restorative.
+
+        let task = GROUND_PROTOCOLS[state.momentum.totalDaysFlown % GROUND_PROTOCOLS.length];
+
+        // Exploration Mode: Stop asking for commitment, varied tasks
+        if (state.settings.explorationMode) {
+          const explorationTasks = ["Try a new movement pattern", "Read a random article", "Organize one digital folder", "Write 100 words of nonsense"];
+          task = explorationTasks[Math.floor(Math.random() * explorationTasks.length)];
+        }
+
         return {
           daily: { ...state.daily, [today]: { task, completed: false, timeSpent: 0, category: 'GROUND', systemGenerated: true } },
           selfTrust: { ...state.selfTrust, promisesMade: state.selfTrust.promisesMade + 1 }
@@ -104,6 +124,15 @@ export const useWingsStore = create<WingsState & WingsActions>()(
       createTask: (task, category) => set((state) => {
         const today = getTodayISO();
         if (state.daily[today]) return state;
+
+        // Anti-Dopamine: block certain categories if needed
+        if (state.settings.antiDopamine && (category === 'FLIGHT' || category === 'SKILL')) {
+          // Force restorative categories
+          // Not explicitly blocking yet but could be added if categories were defined as "stimulating"
+        }
+
+        // Maintenance Mode: preserve streak, low minimum (handled in effort logic)
+
         return {
           daily: { ...state.daily, [today]: { task, completed: false, timeSpent: 0, category, systemGenerated: false } },
           selfTrust: { ...state.selfTrust, promisesMade: state.selfTrust.promisesMade + 1 }
@@ -145,7 +174,10 @@ export const useWingsStore = create<WingsState & WingsActions>()(
         const missedYesterday = !yesterdayTask || !yesterdayTask.completed;
         const alreadyMarkedMiss = state.momentum.lastMissedDate === yesterday;
 
-        if (missedYesterday && !alreadyMarkedMiss && state.selfTrust.promisesMade > 0) {
+        // Skip reset logic if in Maintenance Mode or certain overrides
+        const skipReset = state.settings.maintenanceMode;
+
+        if (missedYesterday && !alreadyMarkedMiss && state.selfTrust.promisesMade > 0 && !skipReset) {
           if (state.settings.hardMode) {
             // HARD MODE FAILURE: Catastrophic Reset
             set({
@@ -163,10 +195,17 @@ export const useWingsStore = create<WingsState & WingsActions>()(
             momentum: { ...state.momentum, currentStreak: 0, lastMissedDate: yesterday }
           });
         }
-        
+
         const { capacity, history } = _calculateCapacity(state.daily);
+
+        // Handle State Overrides
+        let finalCapacity = capacity;
+        if (state.settings.stateOverride === 'FORCE_RECOVERY') finalCapacity = 'FRAGILE';
+        if (state.settings.stateOverride === 'FORCE_PUSH') finalCapacity = 'HIGH';
+        if (state.settings.maintenanceMode) finalCapacity = 'STABLE';
+
         set((s) => ({
-          capacity: capacity,
+          capacity: finalCapacity,
           momentum: { ...s.momentum, showUpHistory: history }
         }));
       },

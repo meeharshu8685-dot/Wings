@@ -49,6 +49,12 @@ export interface Settings {
   motion: "full" | "reduced";
   userAge?: number;
   hardMode: boolean;
+  stateOverride: 'AUTO' | 'FORCE_RECOVERY' | 'FORCE_PUSH';
+  antiDopamine: boolean;
+  focusLock: boolean;
+  explorationMode: boolean;
+  maintenanceMode: boolean;
+  growthMode: boolean;
 }
 
 // GROWTH MODE: The memory layer of the system.
@@ -72,4 +78,4 @@ export interface WingsState {
   growth: GrowthState; // The evolution engine
 }
 
-export type ViewState = 'GOAL' | 'FLIGHT' | 'MOMENTUM' | 'PRESSURE' | 'SETTINGS' | 'FAILURE';
+export type ViewState = 'GOAL' | 'FLIGHT' | 'MOMENTUM' | 'PRESSURE' | 'SETTINGS' | 'FAILURE' | 'CONTROL_PANEL';
