@@ -22,15 +22,27 @@ const NavButton = ({
 }) => (
   <button
     onClick={onClick}
-    className={`p-4 rounded-full transition-all duration-500 ease-out relative group ${active
-      ? 'text-white bg-zinc-800 shadow-[0_0_15px_rgba(255,255,255,0.1)]'
-      : 'text-zinc-600 hover:text-zinc-400'
+    className={`p-4 rounded-2xl transition-all duration-700 ease-out relative group ${active
+      ? 'text-indigo-600 bg-white/80 shadow-[0_4px_20px_rgba(99,102,241,0.15)] ring-1 ring-indigo-500/10'
+      : 'text-slate-400 hover:text-slate-600 hover:bg-white/40'
       }`}
   >
-    {icon}
-    <span className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 text-[10px] uppercase tracking-widest text-zinc-500 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+    <motion.div
+      whileHover={{ scale: 1.1 }}
+      whileTap={{ scale: 0.95 }}
+      transition={{ type: "spring", stiffness: 400, damping: 17 }}
+    >
+      {icon}
+    </motion.div>
+    <span className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 text-[10px] uppercase tracking-[0.2em] font-semibold text-slate-500 opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none translate-y-2 group-hover:translate-y-0">
       {label}
     </span>
+    {active && (
+      <motion.div
+        layoutId="activeTab"
+        className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-indigo-500"
+      />
+    )}
   </button>
 );
 
@@ -45,14 +57,14 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentView, onChangeV
   // Hide nav during failure state or Focus Lock
   if (isFailureState || isFocusLocked) {
     return (
-      <main className="min-h-screen bg-zinc-950 text-zinc-200 flex flex-col items-center justify-center p-6">
+      <main className="min-h-screen text-slate-800 flex flex-col items-center justify-center p-6 bg-white/20 backdrop-blur-3xl">
         {children}
       </main>
     );
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-200 flex flex-col items-center justify-between overflow-hidden selection:bg-indigo-500/30">
+    <div className="min-h-screen text-slate-800 flex flex-col items-center justify-between overflow-hidden selection:bg-indigo-500/10">
 
       <main className="flex-1 w-full max-w-xl flex flex-col justify-center p-6 relative">
         <AnimatePresence mode="wait">
@@ -69,7 +81,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentView, onChangeV
         </AnimatePresence>
       </main>
 
-      <nav className="mb-8 px-6 py-3 bg-zinc-900/50 backdrop-blur-md rounded-full border border-zinc-800/50 flex space-x-2">
+      <nav className="mb-10 px-4 py-2 glass rounded-3xl flex space-x-1">
 
         {showFlightNav && (
           <NavButton active={currentView === 'GOAL'} onClick={() => onChangeView('GOAL')} label="Lock"
@@ -89,12 +101,12 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentView, onChangeV
 
         {showFlightNav && (
           <NavButton active={currentView === 'PRESSURE'} onClick={() => onChangeView('PRESSURE')} label="Reality"
-            icon={<svg xmlns="http://www.w.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>}
+            icon={<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>}
           />
         )}
 
         <NavButton active={currentView === 'SETTINGS'} onClick={() => onChangeView('SETTINGS')} label="System"
-          icon={<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>}
+          icon={<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>}
         />
 
         <NavButton active={currentView === 'CONTROL_PANEL'} onClick={() => onChangeView('CONTROL_PANEL')} label="Control"

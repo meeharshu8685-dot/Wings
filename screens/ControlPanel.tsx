@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useWingsStore } from '../store/useWingsStore';
 
-const HeavyToggle = ({
+const RadiantSwitch = ({
     label,
     value,
     options,
@@ -15,68 +15,50 @@ const HeavyToggle = ({
     onChange: (val: any) => void,
     warning?: boolean
 }) => {
-    const [isPending, setIsPending] = useState(false);
-
-    const handleClick = (nextVal: any) => {
-        if (nextVal === value) return;
-        setIsPending(true);
-        // Heavy animation delay
-        setTimeout(() => {
-            onChange(nextVal);
-            setIsPending(false);
-        }, 600);
-    };
-
     return (
-        <div className={`space-y-4 p-6 border ${warning ? 'border-red-900/30' : 'border-zinc-800/50'} bg-zinc-900/20 transition-all`}>
-            <div className="flex justify-between items-baseline">
-                <label className={`text-[10px] uppercase tracking-[0.2em] ${warning ? 'text-red-500' : 'text-zinc-500'}`}>
+        <div className={`glass p-6 rounded-[2rem] space-y-4 transition-all duration-500 overflow-hidden relative group`}>
+            {warning && (
+                <div className="absolute inset-0 bg-rose-500/5 pointer-events-none" />
+            )}
+            <div className="flex justify-between items-center">
+                <label className={`text-[10px] uppercase tracking-[0.3em] font-bold ${warning ? 'text-rose-500' : 'text-slate-400'}`}>
                     {label}
                 </label>
-                {isPending && (
-                    <motion.span
-                        initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                        className="text-[10px] font-mono text-zinc-600 animate-pulse"
-                    >
-                        SYNCHRONIZING...
-                    </motion.span>
-                )}
             </div>
 
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-3 mt-2">
                 {options ? (
                     options.map((opt) => (
-                        <button
+                        <motion.button
                             key={opt.value}
-                            onClick={() => handleClick(opt.value)}
-                            disabled={isPending}
-                            className={`px-4 py-2 text-[11px] uppercase tracking-widest border transition-all duration-500 ${value === opt.value
-                                ? (warning ? 'bg-red-950 border-red-500 text-red-200' : 'bg-white border-white text-black')
-                                : 'border-zinc-800 text-zinc-600 hover:border-zinc-500 hover:text-zinc-300'
-                                } ${isPending ? 'opacity-50 cursor-wait' : ''}`}
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => onChange(opt.value)}
+                            className={`px-5 py-2 text-[10px] uppercase tracking-[0.2em] font-bold rounded-xl transition-all duration-300 border ${value === opt.value
+                                ? (warning ? 'bg-rose-500 text-white border-rose-500' : 'bg-indigo-600 text-white border-indigo-600 shadow-lg shadow-indigo-100')
+                                : 'bg-white/50 border-slate-100 text-slate-400 hover:border-indigo-200 hover:text-indigo-400'
+                                }`}
                         >
                             {opt.label}
-                        </button>
+                        </motion.button>
                     ))
                 ) : (
-                    <div className="flex gap-2">
+                    <div className="flex bg-slate-100/50 p-1 rounded-xl">
                         <button
-                            onClick={() => handleClick(true)}
-                            disabled={isPending || value === true}
-                            className={`px-6 py-2 text-[11px] uppercase tracking-widest border transition-all duration-500 ${value === true
-                                ? (warning ? 'bg-red-950 border-red-500 text-red-200' : 'bg-white border-white text-black')
-                                : 'border-zinc-800 text-zinc-600 hover:border-zinc-500 hover:text-zinc-300'
-                                } ${isPending ? 'opacity-50 cursor-wait' : ''}`}
+                            onClick={() => onChange(true)}
+                            className={`px-6 py-2 text-[10px] uppercase tracking-[0.2em] font-bold rounded-lg transition-all duration-500 ${value === true
+                                ? (warning ? 'bg-rose-500 text-white shadow-md shadow-rose-100' : 'bg-white text-indigo-600 shadow-sm')
+                                : 'text-slate-400 opacity-60'
+                                }`}
                         >
                             ON
                         </button>
                         <button
-                            onClick={() => handleClick(false)}
-                            disabled={isPending || value === false}
-                            className={`px-6 py-2 text-[11px] uppercase tracking-widest border transition-all duration-500 ${value === false
-                                ? 'bg-zinc-800 border-zinc-800 text-zinc-400'
-                                : 'border-zinc-800 text-zinc-600 hover:border-zinc-500 hover:text-zinc-300'
-                                } ${isPending ? 'opacity-50 cursor-wait' : ''}`}
+                            onClick={() => onChange(false)}
+                            className={`px-6 py-2 text-[10px] uppercase tracking-[0.2em] font-bold rounded-lg transition-all duration-500 ${value === false
+                                ? 'bg-white text-slate-600 shadow-sm'
+                                : 'text-slate-400 opacity-60'
+                                }`}
                         >
                             OFF
                         </button>
@@ -99,92 +81,94 @@ export const ControlPanel: React.FC = () => {
         settings.maintenanceMode;
 
     const isPlanningLimited = capacity === 'CAPABLE' && !isPlanningBlocked;
-    const isPlanningLight = settings.explorationMode && !isPlanningBlocked;
 
     return (
-        <div className="w-full max-w-lg space-y-12 py-8">
-            <div className="text-center space-y-2">
-                <h1 className="text-2xl font-light tracking-[0.3em] text-white uppercase">Control Panel</h1>
-                <p className="text-[10px] text-zinc-600 tracking-widest uppercase">Manual System Override Hub</p>
+        <div className="w-full max-w-2xl space-y-12 py-8 px-4">
+            <div className="text-center space-y-4">
+                <motion.h1
+                    initial={{ y: -10, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    className="text-3xl font-extralight tracking-[0.4em] text-slate-400 uppercase"
+                >
+                    System Core
+                </motion.h1>
+                <p className="text-[10px] text-slate-400 tracking-[0.3em] uppercase font-light">Direct Agency Controls</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Planning Mode Toggle */}
                 <div className="md:col-span-2">
-                    <HeavyToggle
-                        label={isPlanningBlocked ? "Planning Blocked (Restrictive State)" : "Planning Mode"}
+                    <RadiantSwitch
+                        label={isPlanningBlocked ? "Strategy Blocked (Restrictive State)" : "Strategic Planning"}
                         value={settings.planningMode}
                         onChange={(val) => !isPlanningBlocked && handleUpdate('planningMode', val)}
                         warning={isPlanningBlocked}
                     />
                     {isPlanningLimited && (
-                        <p className="text-[9px] text-zinc-500 uppercase tracking-widest mt-2 px-6">Limited strategic access in Build Mode.</p>
+                        <p className="text-[9px] text-indigo-400 font-bold uppercase tracking-widest mt-3 px-6 text-center">Elevation required for deeper strategy.</p>
                     )}
                 </div>
 
-                {/* Toggle 1: State Override */}
+                {/* State Override */}
                 <div className="md:col-span-2">
-                    <HeavyToggle
-                        label="I am not okay today"
+                    <RadiantSwitch
+                        label="Override: System Stance"
                         value={settings.stateOverride}
                         options={[
                             { label: 'Auto', value: 'AUTO' },
-                            { label: 'Force Recovery', value: 'FORCE_RECOVERY' },
-                            { label: 'Force Push', value: 'FORCE_PUSH' }
+                            { label: 'Recovery', value: 'FORCE_RECOVERY' },
+                            { label: 'Push', value: 'FORCE_PUSH' }
                         ]}
                         onChange={(val) => handleUpdate('stateOverride', val)}
                         warning={settings.stateOverride !== 'AUTO'}
                     />
                 </div>
 
-                {/* Toggle 2: Anti-Dopamine */}
-                <HeavyToggle
-                    label="Anti-dopamine"
+                {/* Toggles */}
+                <RadiantSwitch
+                    label="Noise Filter (Anti-Dopamine)"
                     value={settings.antiDopamine}
                     onChange={(val) => handleUpdate('antiDopamine', val)}
                 />
 
-                {/* Toggle 3: Focus Lock */}
-                <HeavyToggle
-                    label="Lock me in"
+                <RadiantSwitch
+                    label="Sanctuary (Focus Lock)"
                     value={settings.focusLock}
                     onChange={(val) => handleUpdate('focusLock', val)}
                     warning={settings.focusLock}
                 />
 
-                {/* Toggle 4: Exploration Mode */}
-                <HeavyToggle
-                    label="I don't know what to work on"
+                <RadiantSwitch
+                    label="Exploration (Random Vectors)"
                     value={settings.explorationMode}
                     onChange={(val) => handleUpdate('explorationMode', val)}
                 />
 
-                {/* Toggle 5: Maintenance Mode */}
-                <HeavyToggle
-                    label="Life is heavy right now"
+                <RadiantSwitch
+                    label="Load Protection (Maintenance)"
                     value={settings.maintenanceMode}
                     onChange={(val) => handleUpdate('maintenanceMode', val)}
+                    warning={settings.maintenanceMode}
                 />
 
-                {/* Toggle 6: Growth Mode */}
-                <div className="md:col-span-2 opacity-50 pointer-events-none">
-                    <div className="p-6 border border-zinc-800 bg-zinc-900/10">
-                        <div className="flex justify-between items-baseline mb-4">
-                            <label className="text-[10px] uppercase tracking-[0.2em] text-zinc-500">
-                                Grow with me
+                {/* Growth State */}
+                <div className="md:col-span-2 opacity-50">
+                    <div className="glass p-8 rounded-[2rem] flex justify-between items-center group overflow-hidden relative">
+                        <div className="absolute inset-0 bg-indigo-50/10 scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-700" />
+                        <div className="relative z-10">
+                            <label className="text-[10px] uppercase tracking-[0.3em] text-slate-400 font-bold">
+                                Growth Synchronization
                             </label>
-                            <span className="text-[10px] font-mono text-zinc-700">ACTIVE</span>
+                            <p className="text-[11px] text-slate-400 uppercase tracking-widest mt-1">Permanent baseline active</p>
                         </div>
-                        <div className="text-[11px] text-zinc-600 uppercase tracking-widest">
-                            Permanent synchronization enabled.
-                        </div>
+                        <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse shadow-lg shadow-indigo-200 relative z-10" />
                     </div>
                 </div>
             </div>
 
-            <div className="pt-8 border-t border-zinc-900 flex justify-center">
-                <div className="text-[9px] text-zinc-700 uppercase tracking-[0.4em]">
-                    Agency without chaos.
+            <div className="pt-8 flex justify-center opacity-30">
+                <div className="text-[10px] text-slate-500 uppercase tracking-[0.5em] font-light">
+                    System Architecture: Premium Radiant
                 </div>
             </div>
         </div>
