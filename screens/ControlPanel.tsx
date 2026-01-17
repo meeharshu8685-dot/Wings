@@ -51,8 +51,8 @@ const HeavyToggle = ({
                             onClick={() => handleClick(opt.value)}
                             disabled={isPending}
                             className={`px-4 py-2 text-[11px] uppercase tracking-widest border transition-all duration-500 ${value === opt.value
-                                    ? (warning ? 'bg-red-950 border-red-500 text-red-200' : 'bg-white border-white text-black')
-                                    : 'border-zinc-800 text-zinc-600 hover:border-zinc-500 hover:text-zinc-300'
+                                ? (warning ? 'bg-red-950 border-red-500 text-red-200' : 'bg-white border-white text-black')
+                                : 'border-zinc-800 text-zinc-600 hover:border-zinc-500 hover:text-zinc-300'
                                 } ${isPending ? 'opacity-50 cursor-wait' : ''}`}
                         >
                             {opt.label}
@@ -64,8 +64,8 @@ const HeavyToggle = ({
                             onClick={() => handleClick(true)}
                             disabled={isPending || value === true}
                             className={`px-6 py-2 text-[11px] uppercase tracking-widest border transition-all duration-500 ${value === true
-                                    ? (warning ? 'bg-red-950 border-red-500 text-red-200' : 'bg-white border-white text-black')
-                                    : 'border-zinc-800 text-zinc-600 hover:border-zinc-500 hover:text-zinc-300'
+                                ? (warning ? 'bg-red-950 border-red-500 text-red-200' : 'bg-white border-white text-black')
+                                : 'border-zinc-800 text-zinc-600 hover:border-zinc-500 hover:text-zinc-300'
                                 } ${isPending ? 'opacity-50 cursor-wait' : ''}`}
                         >
                             ON
@@ -74,8 +74,8 @@ const HeavyToggle = ({
                             onClick={() => handleClick(false)}
                             disabled={isPending || value === false}
                             className={`px-6 py-2 text-[11px] uppercase tracking-widest border transition-all duration-500 ${value === false
-                                    ? 'bg-zinc-800 border-zinc-800 text-zinc-400'
-                                    : 'border-zinc-800 text-zinc-600 hover:border-zinc-500 hover:text-zinc-300'
+                                ? 'bg-zinc-800 border-zinc-800 text-zinc-400'
+                                : 'border-zinc-800 text-zinc-600 hover:border-zinc-500 hover:text-zinc-300'
                                 } ${isPending ? 'opacity-50 cursor-wait' : ''}`}
                         >
                             OFF
@@ -88,11 +88,18 @@ const HeavyToggle = ({
 };
 
 export const ControlPanel: React.FC = () => {
-    const { settings, updateSettings } = useWingsStore();
+    const { settings, updateSettings, capacity } = useWingsStore();
 
     const handleUpdate = (key: keyof typeof settings, value: any) => {
         updateSettings({ [key]: value });
     };
+
+    const isPlanningBlocked = settings.stateOverride === 'FORCE_RECOVERY' ||
+        settings.stateOverride === 'FORCE_PUSH' ||
+        settings.maintenanceMode;
+
+    const isPlanningLimited = capacity === 'CAPABLE' && !isPlanningBlocked;
+    const isPlanningLight = settings.explorationMode && !isPlanningBlocked;
 
     return (
         <div className="w-full max-w-lg space-y-12 py-8">
@@ -102,6 +109,19 @@ export const ControlPanel: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Planning Mode Toggle */}
+                <div className="md:col-span-2">
+                    <HeavyToggle
+                        label={isPlanningBlocked ? "Planning Blocked (Restrictive State)" : "Planning Mode"}
+                        value={settings.planningMode}
+                        onChange={(val) => !isPlanningBlocked && handleUpdate('planningMode', val)}
+                        warning={isPlanningBlocked}
+                    />
+                    {isPlanningLimited && (
+                        <p className="text-[9px] text-zinc-500 uppercase tracking-widest mt-2 px-6">Limited strategic access in Build Mode.</p>
+                    )}
+                </div>
+
                 {/* Toggle 1: State Override */}
                 <div className="md:col-span-2">
                     <HeavyToggle

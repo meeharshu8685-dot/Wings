@@ -4,6 +4,18 @@ export type CapacityState = 'FRAGILE' | 'STABLE' | 'CAPABLE' | 'HIGH';
 
 export type TaskCategory = 'BODY' | 'ORDER' | 'SKILL' | 'FOCUS' | 'FLIGHT' | 'GROUND';
 
+export interface PlanningDirection {
+  text: string;
+  lockedUntil: string;
+}
+
+export interface PlanningState {
+  directions: PlanningDirection[];
+  timeBudget: number; // minutes
+  priorityWeights: Record<string, number>;
+  constraints: string[];
+}
+
 export interface WingsIdentity {
   longTermGoal: string;
   wingStatement: string;
@@ -55,6 +67,7 @@ export interface Settings {
   explorationMode: boolean;
   maintenanceMode: boolean;
   growthMode: boolean;
+  planningMode: boolean;
 }
 
 // GROWTH MODE: The memory layer of the system.
@@ -75,7 +88,8 @@ export interface WingsState {
   selfTrust: SelfTrust;
   weeklyReports: WeeklyReport[];
   settings: Settings;
-  growth: GrowthState; // The evolution engine
+  growth: GrowthState;
+  planning: PlanningState;
 }
 
-export type ViewState = 'GOAL' | 'FLIGHT' | 'MOMENTUM' | 'PRESSURE' | 'SETTINGS' | 'FAILURE' | 'CONTROL_PANEL';
+export type ViewState = 'GOAL' | 'FLIGHT' | 'MOMENTUM' | 'PRESSURE' | 'SETTINGS' | 'FAILURE' | 'CONTROL_PANEL' | 'PLANNING';

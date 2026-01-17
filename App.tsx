@@ -7,6 +7,7 @@ import { TimePressure } from './screens/TimePressure';
 import { WeeklyReportModal } from './screens/WeeklyReport';
 import { Settings } from './screens/Settings';
 import { ControlPanel } from './screens/ControlPanel';
+import { Planning } from './screens/Planning';
 import { Failure } from './screens/Failure';
 import { useWingsStore } from './store/useWingsStore';
 import { ViewState } from './types';
@@ -41,6 +42,7 @@ function App() {
       case 'PRESSURE': return <TimePressure />;
       case 'SETTINGS': return <Settings />;
       case 'CONTROL_PANEL': return <ControlPanel />;
+      case 'PLANNING': return <Planning />;
       case 'FAILURE': return <Failure onChangeView={setCurrentView} />;
       default: return <FlightDeck />;
     }

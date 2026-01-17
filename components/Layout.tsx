@@ -23,8 +23,8 @@ const NavButton = ({
   <button
     onClick={onClick}
     className={`p-4 rounded-full transition-all duration-500 ease-out relative group ${active
-        ? 'text-white bg-zinc-800 shadow-[0_0_15px_rgba(255,255,255,0.1)]'
-        : 'text-zinc-600 hover:text-zinc-400'
+      ? 'text-white bg-zinc-800 shadow-[0_0_15px_rgba(255,255,255,0.1)]'
+      : 'text-zinc-600 hover:text-zinc-400'
       }`}
   >
     {icon}
@@ -99,6 +99,10 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentView, onChangeV
 
         <NavButton active={currentView === 'CONTROL_PANEL'} onClick={() => onChangeView('CONTROL_PANEL')} label="Control"
           icon={<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="16" height="20" x="4" y="2" rx="2" /><line x1="12" y1="18" x2="12" y2="6" /><line x1="8" y1="12" x2="16" y2="12" /></svg>}
+        />
+
+        <NavButton active={currentView === 'PLANNING'} onClick={() => onChangeView('PLANNING')} label="Strategy"
+          icon={<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v8" /><path d="m4.93 10.93 1.41 1.41" /><path d="M2 18h2" /><path d="M20 18h2" /><path d="m19.07 10.93-1.41 1.41" /><path d="M22 22H2" /><path d="m8 22 4-10 4 10" /></svg>}
         />
       </nav>
     </div>

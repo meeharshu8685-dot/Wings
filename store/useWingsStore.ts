@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { WingsState, WingsLevel, TaskCategory, DailyLog, CapacityState, GrowthState } from '../types';
+import { WingsState, WingsLevel, TaskCategory, DailyLog, CapacityState, GrowthState, PlanningState, PlanningDirection } from '../types';
 import { getTodayISO, getYesterdayISO, addDays } from '../utils/dateUtils';
 
 const LEVEL_THRESHOLDS = { 0: 3, 1: 7, 2: 14, 3: Infinity };
@@ -17,6 +17,13 @@ const INITIAL_GROWTH_STATE: GrowthState = {
   highestCapacityAchieved: 'FRAGILE',
   peakWeeklyAverageEffort: 0,
   categoryUsage: {},
+};
+
+const INITIAL_PLANNING_STATE: PlanningState = {
+  directions: [],
+  timeBudget: 30,
+  priorityWeights: { BODY: 20, ORDER: 20, SKILL: 20, FOCUS: 20, FLIGHT: 20 },
+  constraints: []
 };
 
 const _calculate7DayAverageEffort = (dailyLog: DailyLog): number => {
@@ -71,6 +78,7 @@ interface WingsActions {
   recalculateCapacityAndSanity: () => void;
   toggleHardMode: () => void;
   acknowledgeFailure: () => void;
+  updatePlanning: (planning: Partial<PlanningState>) => void;
 }
 
 const INITIAL_STATE: WingsState = {
@@ -90,9 +98,11 @@ const INITIAL_STATE: WingsState = {
     focusLock: false,
     explorationMode: false,
     maintenanceMode: false,
-    growthMode: true
+    growthMode: true,
+    planningMode: false
   },
-  growth: INITIAL_GROWTH_STATE
+  growth: INITIAL_GROWTH_STATE,
+  planning: INITIAL_PLANNING_STATE
 };
 
 export const useWingsStore = create<WingsState & WingsActions>()(
@@ -105,19 +115,39 @@ export const useWingsStore = create<WingsState & WingsActions>()(
         const today = getTodayISO();
         if (state.daily[today]) return state;
 
-        // Anti-Dopamine: only restorative/phone-free tasks
-        // For simplicity, we assume GROUND_PROTOCOLS are already restorative.
+        // Planning Mode Logic: Pick from weighted categories
+        const priorityWeights = state.planning.priorityWeights;
+        const categories = Object.keys(priorityWeights) as TaskCategory[];
+        const weights = Object.values(priorityWeights) as number[];
+        const totalWeight = weights.reduce((a, b) => a + b, 0);
+        let random = Math.random() * totalWeight;
+        let selectedCategory: TaskCategory = 'GROUND';
+
+        for (const cat of categories) {
+          const weight = (priorityWeights[cat] || 0) as number;
+          if (random < weight) {
+            selectedCategory = cat;
+            break;
+          }
+          random -= weight;
+        }
 
         let task = GROUND_PROTOCOLS[state.momentum.totalDaysFlown % GROUND_PROTOCOLS.length];
 
-        // Exploration Mode: Stop asking for commitment, varied tasks
+        // Use Directions if available in Planning Mode
+        if (state.planning.directions.length > 0) {
+          const dir = state.planning.directions[Math.floor(Math.random() * state.planning.directions.length)];
+          task = `${dir.text}: Focus on ${selectedCategory.toLowerCase()} vector.`;
+        }
+
+        // Exploration Mode Override
         if (state.settings.explorationMode) {
           const explorationTasks = ["Try a new movement pattern", "Read a random article", "Organize one digital folder", "Write 100 words of nonsense"];
           task = explorationTasks[Math.floor(Math.random() * explorationTasks.length)];
         }
 
         return {
-          daily: { ...state.daily, [today]: { task, completed: false, timeSpent: 0, category: 'GROUND', systemGenerated: true } },
+          daily: { ...state.daily, [today]: { task, completed: false, timeSpent: 0, category: selectedCategory, systemGenerated: true } },
           selfTrust: { ...state.selfTrust, promisesMade: state.selfTrust.promisesMade + 1 }
         };
       }),
@@ -210,7 +240,8 @@ export const useWingsStore = create<WingsState & WingsActions>()(
         }));
       },
       toggleHardMode: () => set((state) => ({ settings: { ...state.settings, hardMode: !state.settings.hardMode } })),
-      acknowledgeFailure: () => set((state) => ({ momentum: { ...state.momentum, lastHardModeFailure: null } }))
+      acknowledgeFailure: () => set((state) => ({ momentum: { ...state.momentum, lastHardModeFailure: null } })),
+      updatePlanning: (newPlanning) => set((state) => ({ planning: { ...state.planning, ...newPlanning } }))
     }),
     {
       name: 'wings_state_v4',
