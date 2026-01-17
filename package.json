@@ -9,11 +9,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "recharts": "^3.6.0",
+    "framer-motion": "^12.26.2",
+    "lottie-react": "^2.4.1",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
-    "zustand": "^5.0.10",
-    "framer-motion": "^12.26.2"
+    "recharts": "^3.6.0",
+    "zustand": "^5.0.10"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
