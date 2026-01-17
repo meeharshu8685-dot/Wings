@@ -11,6 +11,7 @@ import { Settings } from './screens/Settings';
 import { ControlPanel } from './screens/ControlPanel';
 import { Planning } from './screens/Planning';
 import { Failure } from './screens/Failure';
+import { LifeReview } from './screens/LifeReview';
 import { useWingsStore } from './store/useWingsStore';
 import { ViewState } from './types';
 import { getStartOfWeek } from './utils/dateUtils';
@@ -78,6 +79,7 @@ function App() {
       case 'CONTROL_PANEL': return <ControlPanel />;
       case 'PLANNING': return <Planning />;
       case 'FAILURE': return <Failure onChangeView={navigateTo} />;
+      case 'LIFE_REVIEW': return <LifeReview />;
       default: return <FlightDeck />;
     }
   };

@@ -47,6 +47,40 @@ export interface PlanningState {
   constraints: string[];
 }
 
+// ===== LIFE REVIEW =====
+
+export type MoodLevel = 1 | 2 | 3 | 4 | 5; // 1=struggling, 5=thriving
+
+export interface DailyMoodEntry {
+  date: string; // ISO date
+  mood: MoodLevel;
+  note?: string;
+}
+
+export interface LifeReviewEntry {
+  id: string;
+  type: 'WEEKLY' | 'MONTHLY';
+  date: string; // ISO date when review was taken
+  periodStart: string; // Start of the review period
+  periodEnd: string; // End of the review period
+  responses: {
+    question: string;
+    answer: string;
+  }[];
+  insights: {
+    consistencyScore: number; // 0-100
+    averageMood: number; // 1-5
+    disciplineScore: number; // 0-100
+  };
+}
+
+export interface LifeReviewState {
+  moodLog: DailyMoodEntry[];
+  reviews: LifeReviewEntry[];
+  lastWeeklyReview: string | null; // ISO date
+  lastMonthlyReview: string | null; // ISO date
+}
+
 export interface WingsIdentity {
   longTermGoal: string;
   wingStatement: string;
@@ -126,6 +160,7 @@ export interface WingsState {
   planning: PlanningState;
   energy: EnergySignals; // Energy-First Selection
   boredomTraining: BoredomTraining; // Boredom Training state
+  lifeReview: LifeReviewState; // Life Review state
 }
 
-export type ViewState = 'GOAL' | 'FLIGHT' | 'MOMENTUM' | 'PRESSURE' | 'SETTINGS' | 'FAILURE' | 'CONTROL_PANEL' | 'PLANNING';
+export type ViewState = 'GOAL' | 'FLIGHT' | 'MOMENTUM' | 'PRESSURE' | 'SETTINGS' | 'FAILURE' | 'CONTROL_PANEL' | 'PLANNING' | 'LIFE_REVIEW';

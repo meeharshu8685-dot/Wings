@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { WingsState, WingsLevel, TaskCategory, DailyLog, CapacityState, GrowthState, PlanningState, PlanningDirection, DailyRule, EnergySignals, BoredomTraining, WeeklyCheck } from '../types';
+import { WingsState, WingsLevel, TaskCategory, DailyLog, CapacityState, GrowthState, PlanningState, PlanningDirection, DailyRule, EnergySignals, BoredomTraining, WeeklyCheck, LifeReviewState, LifeReviewEntry, MoodLevel } from '../types';
 import { getTodayISO, getYesterdayISO, addDays, getStartOfWeek } from '../utils/dateUtils';
 
 const LEVEL_THRESHOLDS = { 0: 3, 1: 7, 2: 14, 3: Infinity };
@@ -52,6 +52,13 @@ const INITIAL_BOREDOM_STATE: BoredomTraining = {
   weekStart: getStartOfWeek()
 };
 
+const INITIAL_LIFE_REVIEW_STATE: LifeReviewState = {
+  moodLog: [],
+  reviews: [],
+  lastWeeklyReview: null,
+  lastMonthlyReview: null
+};
+
 const _calculate7DayAverageEffort = (dailyLog: DailyLog): number => {
   let totalTime = 0;
   let completedDays = 0;
@@ -98,14 +105,17 @@ interface WingsActions {
   setLongTermGoal: (goal: string) => void;
   lockGoal: () => void;
   createTask: (task: string, category: TaskCategory) => void;
-  generateDailyRule: () => void; // Replaced generateGroundTask
-  completeRule: () => void; // Complete the daily rule
+  generateDailyRule: () => void;
+  completeRule: () => void;
   updateSettings: (settings: Partial<WingsState['settings']>) => void;
   recalculateCapacityAndSanity: () => void;
   toggleHardMode: () => void;
   acknowledgeFailure: () => void;
   updatePlanning: (planning: Partial<PlanningState>) => void;
-  answerWeeklyCheck: (answer: boolean) => void; // Weekly Reality Check
+  answerWeeklyCheck: (answer: boolean) => void;
+  // Life Review Actions
+  logMood: (mood: MoodLevel, note?: string) => void;
+  submitLifeReview: (type: 'WEEKLY' | 'MONTHLY', responses: { question: string; answer: string }[]) => void;
 }
 
 // ===== ENERGY-FIRST CALCULATION =====
@@ -171,7 +181,8 @@ const INITIAL_STATE: WingsState = {
   growth: INITIAL_GROWTH_STATE,
   planning: INITIAL_PLANNING_STATE,
   energy: INITIAL_ENERGY_STATE,
-  boredomTraining: INITIAL_BOREDOM_STATE
+  boredomTraining: INITIAL_BOREDOM_STATE,
+  lifeReview: INITIAL_LIFE_REVIEW_STATE
 };
 
 export const useWingsStore = create<WingsState & WingsActions>()(
@@ -376,7 +387,97 @@ export const useWingsStore = create<WingsState & WingsActions>()(
         return {
           weeklyChecks: [...state.weeklyChecks, newCheck]
         };
-      })
+      }),
+
+      // ===== LIFE REVIEW =====
+      logMood: (mood: MoodLevel, note?: string) => set((state) => {
+        const today = getTodayISO();
+
+        // Check if already logged today
+        const existingIndex = state.lifeReview.moodLog.findIndex(m => m.date === today);
+        const newEntry = { date: today, mood, note };
+
+        if (existingIndex >= 0) {
+          // Update existing entry
+          const updatedLog = [...state.lifeReview.moodLog];
+          updatedLog[existingIndex] = newEntry;
+          return { lifeReview: { ...state.lifeReview, moodLog: updatedLog } };
+        }
+
+        return {
+          lifeReview: {
+            ...state.lifeReview,
+            moodLog: [...state.lifeReview.moodLog, newEntry]
+          }
+        };
+      }),
+
+      submitLifeReview: (type: 'WEEKLY' | 'MONTHLY', responses: { question: string; answer: string }[]) => {
+        const state = get();
+        const today = getTodayISO();
+
+        // Calculate period dates
+        let periodStart: string;
+        let periodEnd = today;
+
+        if (type === 'WEEKLY') {
+          periodStart = getStartOfWeek();
+        } else {
+          // Monthly: first day of current month
+          const d = new Date();
+          d.setDate(1);
+          periodStart = d.toISOString().split('T')[0];
+        }
+
+        // Calculate insights from data
+        const recentMoods = state.lifeReview.moodLog.filter(
+          m => m.date >= periodStart && m.date <= periodEnd
+        );
+        const averageMood = recentMoods.length > 0
+          ? recentMoods.reduce((sum, m) => sum + m.mood, 0) / recentMoods.length
+          : 3;
+
+        // Consistency: days with completed rules in period / total days in period
+        const periodDays = Math.ceil((new Date(periodEnd).getTime() - new Date(periodStart).getTime()) / (1000 * 60 * 60 * 24)) + 1;
+        let completedDays = 0;
+        for (let i = 0; i < periodDays; i++) {
+          const d = new Date(periodStart);
+          d.setDate(d.getDate() + i);
+          const dateStr = d.toISOString().split('T')[0];
+          if (state.daily[dateStr]?.completed) completedDays++;
+        }
+        const consistencyScore = Math.round((completedDays / periodDays) * 100);
+
+        // Discipline score: softer metric based on showing up ratio and streak
+        const showUpRatio = state.momentum.showUpHistory.filter(Boolean).length / 7;
+        const streakBonus = Math.min(state.momentum.currentStreak * 2, 20);
+        const disciplineScore = Math.min(100, Math.round(showUpRatio * 80 + streakBonus));
+
+        const newReview: LifeReviewEntry = {
+          id: `${type}-${today}-${Date.now()}`,
+          type,
+          date: today,
+          periodStart,
+          periodEnd,
+          responses,
+          insights: {
+            consistencyScore,
+            averageMood: Math.round(averageMood * 10) / 10,
+            disciplineScore
+          }
+        };
+
+        set({
+          lifeReview: {
+            ...state.lifeReview,
+            reviews: [...state.lifeReview.reviews, newReview],
+            lastWeeklyReview: type === 'WEEKLY' ? today : state.lifeReview.lastWeeklyReview,
+            lastMonthlyReview: type === 'MONTHLY' ? today : state.lifeReview.lastMonthlyReview
+          }
+        });
+      },
+
+      lockGoal: () => set((state) => ({ identity: { ...state.identity, lockedUntil: addDays(getTodayISO(), 90) } }))
     }),
     {
       name: 'wings_state_v5',
