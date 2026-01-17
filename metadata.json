@@ -1,0 +1,5 @@
+{
+  "name": "WINGS",
+  "description": "A local-only, offline personal propulsion system designed to convert time into pressure and action into momentum.",
+  "requestFramePermissions": []
+}
