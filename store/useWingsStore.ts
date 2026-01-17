@@ -179,14 +179,25 @@ export const useWingsStore = create<WingsState & WingsActions>()(
         let nextLevel = currentLevel;
         const needed = LEVEL_THRESHOLDS[currentLevel as 0 | 1 | 2];
         if (newStreak >= needed && currentLevel < 3) nextLevel = (currentLevel + 1) as WingsLevel;
+
         const { capacity, history } = _calculateCapacity(updatedDaily);
         const newGrowth: GrowthState = { ...state.growth };
+
+        // Progressive Load: Adaptation-based leveling
         if (nextLevel > newGrowth.highestLevelAchieved) newGrowth.highestLevelAchieved = nextLevel;
+
         const capacityMap: Record<CapacityState, number> = { 'FRAGILE': 0, 'STABLE': 1, 'CAPABLE': 2, 'HIGH': 3 };
-        if (capacityMap[capacity] > capacityMap[newGrowth.highestCapacityAchieved]) newGrowth.highestCapacityAchieved = capacity;
+        if (capacityMap[capacity] > capacityMap[newGrowth.highestCapacityAchieved]) {
+          newGrowth.highestCapacityAchieved = capacity;
+        }
+
         const current7DayEffort = _calculate7DayAverageEffort(updatedDaily);
-        if (current7DayEffort > newGrowth.peakWeeklyAverageEffort) newGrowth.peakWeeklyAverageEffort = current7DayEffort;
+        if (current7DayEffort > newGrowth.peakWeeklyAverageEffort) {
+          newGrowth.peakWeeklyAverageEffort = current7DayEffort;
+        }
+
         newGrowth.categoryUsage[currentTask.category] = (newGrowth.categoryUsage[currentTask.category] || 0) + 1;
+
         set({
           level: nextLevel,
           capacity: capacity,
@@ -209,17 +220,18 @@ export const useWingsStore = create<WingsState & WingsActions>()(
 
         if (missedYesterday && !alreadyMarkedMiss && state.selfTrust.promisesMade > 0 && !skipReset) {
           if (state.settings.hardMode) {
-            // HARD MODE FAILURE: Catastrophic Reset
+            // HARD MODE FAILURE: Recursive Load Reduction (Resilience)
+            // Resets level to 0 but PRESERVES identity/growth memory layer
             set({
               level: 0,
               capacity: 'FRAGILE',
-              growth: INITIAL_GROWTH_STATE,
               momentum: { ...state.momentum, currentStreak: 0, lastHardModeFailure: yesterday },
               settings: { ...state.settings, hardMode: false }
             });
             return; // Stop further processing
           }
-          // Normal miss
+          // Normal miss: Self-Trust Over Motivation
+          // Reduce load (drop one level) instead of shame/reset
           set({
             level: Math.max(0, state.level - 1) as WingsLevel,
             momentum: { ...state.momentum, currentStreak: 0, lastMissedDate: yesterday }

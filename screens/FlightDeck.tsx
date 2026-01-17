@@ -28,16 +28,16 @@ const getMinimumEffort = (growth: GrowthState, settings: any, planning: any): nu
 
 const getFlightDeckMessages = (capacity: CapacityState, growth: GrowthState, minEffort: number, settings: any) => {
   if (settings.stateOverride === 'FORCE_RECOVERY') {
-    return { title: "RECOVERY MODE", subtitle: "Expectations dropped. Execute stabilizing patterns only." };
+    return { title: "RECOVERY MODE", subtitle: "Expectations minimized. Stabilize biological baseline." };
   }
   if (settings.stateOverride === 'FORCE_PUSH') {
-    return { title: "PUSH MODE", subtitle: `Comfort signals ignored. Minimum ${minEffort} minutes. No excuses.` };
+    return { title: "PUSH MODE", subtitle: `Comfort ignored. Floor: ${minEffort}m. Environment > Willpower.` };
   }
   if (settings.explorationMode) {
-    return { title: "EXPLORATION", subtitle: "No commitment required. Sample different vectors." };
+    return { title: "EXPLORATION", subtitle: "Vector sampling mode. No commitment required." };
   }
   if (settings.maintenanceMode) {
-    return { title: "MAINTENANCE", subtitle: "Life is heavy. Keep the streak alive with minimum input." };
+    return { title: "MAINTENANCE", subtitle: "Load protection active. Streak preservation is priority." };
   }
 
   const hasProvenStrength = growth.highestCapacityAchieved === 'CAPABLE' || growth.highestCapacityAchieved === 'HIGH';
@@ -46,29 +46,29 @@ const getFlightDeckMessages = (capacity: CapacityState, growth: GrowthState, min
     return {
       title: "GROUND MODE",
       subtitle: hasProvenStrength
-        ? "You know the recovery protocol. No thinking. Execute."
-        : "You are depleted. Do not plan. Do not aspire. Just show up."
+        ? "Recovery protocol. Execute the known sequence. No thinking."
+        : "Low capacity detected. Show up. That is the only protocol."
     };
   }
   if (capacity === 'STABLE') {
     return {
       title: "STABILITY PROTOCOL",
-      subtitle: `Small inputs. ${minEffort} minutes minimum. Repair your foundation.`
+      subtitle: `Small specific inputs. ${minEffort}m floor. Repairing foundation.`
     };
   }
   if (capacity === 'CAPABLE') {
     return {
       title: "BUILD MODE",
-      subtitle: `Proven capacity demands at least ${minEffort} minutes of focused effort.`
+      subtitle: `Adaptive load: ${minEffort}m. Maintain trajectory.`
     };
   }
   if (capacity === 'HIGH') {
     return {
       title: "FLIGHT MODE",
-      subtitle: `High execution standard. Minimum effective dose: ${minEffort} minutes.`
+      subtitle: `Peak demand active. Floor: ${minEffort}m. Progress requires load.`
     };
   }
-  return { title: "STANDBY", subtitle: "Define today's action." };
+  return { title: "STANDBY", subtitle: "Define action for log." };
 };
 
 export const FlightDeck: React.FC = () => {
@@ -111,18 +111,18 @@ export const FlightDeck: React.FC = () => {
 
   if (currentTask?.completed) {
     return (
-      <div className="flex flex-col items-center justify-center space-y-8 text-center">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1.2, ease: "easeOut" }}
-          className="text-zinc-500 uppercase tracking-[0.2em] text-sm"
-        >
-          Flight Complete
-        </motion.div>
-        <div className="space-y-2">
-          <motion.h2 className="text-2xl text-zinc-300 font-light">{currentTask.task}</motion.h2>
-          <p className="text-zinc-600 text-sm font-mono">{currentTask.timeSpent} MINUTES REALITY</p>
+      <div className="text-center space-y-8 py-12">
+        <div className="space-y-4">
+          <h2 className="text-3xl font-extralight tracking-[0.3em] text-zinc-600 uppercase">Mission Logged</h2>
+          <p className="text-[10px] text-zinc-700 uppercase tracking-[0.5em] leading-relaxed max-w-xs mx-auto">
+            Behavior &rarr; Identity<br />
+            Proof: I showed up today.
+          </p>
         </div>
-        <div className="text-zinc-600 text-xs font-mono mt-8">COME BACK TOMORROW</div>
+        <div className="pt-8 border-t border-zinc-900/50">
+          <p className="text-zinc-800 text-[10px] font-mono uppercase tracking-widest">{currentTask.task}</p>
+          <p className="text-zinc-800 text-[10px] font-mono mt-2">{currentTask.timeSpent}M INVESTED</p>
+        </div>
       </div>
     );
   }
@@ -131,15 +131,15 @@ export const FlightDeck: React.FC = () => {
     return (
       <div className="w-full max-w-md">
         <form onSubmit={handleCompletionSubmit} className="flex flex-col items-center space-y-12">
-          <label className="text-zinc-500 text-sm uppercase tracking-widest">Time With Reality (Min: {minEffort})</label>
+          <label className="text-zinc-500 text-[10px] uppercase tracking-[0.3em]">Log Minutes with Reality (Min: {minEffort})</label>
           <div className="relative">
             <input autoFocus type="number" min={minEffort} value={realityTime} onChange={(e) => setRealityTime(e.target.value)} placeholder="0"
-              className="w-32 bg-transparent text-center text-4xl font-light text-zinc-100 placeholder-zinc-800 border-b border-zinc-800 focus:border-zinc-600 pb-2 transition-colors" />
-            <span className="absolute right-0 bottom-4 text-zinc-600 text-sm font-mono">MIN</span>
+              className="w-32 bg-transparent text-center text-4xl font-mono text-zinc-100 placeholder-zinc-800 border-b border-zinc-800 focus:border-zinc-600 pb-2 transition-colors" />
+            <span className="absolute right-0 bottom-4 text-zinc-600 text-xs font-mono tracking-widest">MIN</span>
           </div>
           <div className="flex space-x-4">
-            <button type="button" onClick={() => setIsCompleting(false)} className="px-6 py-3 text-zinc-600 hover:text-zinc-400 text-xs uppercase tracking-widest transition-all">Cancel</button>
-            <button type="submit" disabled={parseInt(realityTime) < minEffort} className="px-8 py-3 bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-600 text-xs uppercase tracking-widest transition-all disabled:opacity-50">Confirm</button>
+            <button type="button" onClick={() => setIsCompleting(false)} className="px-6 py-3 text-zinc-700 hover:text-zinc-500 text-[10px] uppercase tracking-widest transition-all">Cancel</button>
+            <button type="submit" disabled={parseInt(realityTime) < minEffort} className="px-8 py-3 bg-zinc-900 border border-zinc-800 text-zinc-500 hover:text-white hover:border-zinc-600 text-[10px] uppercase tracking-[0.2em] transition-all disabled:opacity-50 font-mono">Confirm Proof of Action</button>
           </div>
         </form>
       </div>
@@ -150,9 +150,9 @@ export const FlightDeck: React.FC = () => {
     return (
       <div className="flex flex-col items-center justify-center space-y-8 py-12 text-center opacity-60">
         <div className="w-12 h-12 border border-zinc-700 animate-spin rounded-full border-t-zinc-400 mb-4" />
-        <h2 className="text-xl font-light tracking-[0.2em] text-zinc-300 uppercase">Strategic Planning in Progress</h2>
+        <h2 className="text-xl font-light tracking-[0.2em] text-zinc-300 uppercase">System Recalibration</h2>
         <p className="text-[10px] text-zinc-600 uppercase max-w-xs leading-relaxed tracking-widest">
-          Execution is paused. The system is recalibrating based on active directions and constraints.
+          Strategic layer feeding execution logic.
         </p>
       </div>
     );
