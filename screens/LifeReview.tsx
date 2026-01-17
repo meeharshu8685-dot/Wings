@@ -20,85 +20,97 @@ const MONTHLY_QUESTIONS = [
     "How aligned are your actions with your goals?"
 ];
 
-const MoodEmoji: Record<MoodLevel, { emoji: string; label: string; color: string }> = {
-    1: { emoji: '😔', label: 'Struggling', color: 'text-rose-500' },
-    2: { emoji: '😐', label: 'Low', color: 'text-orange-400' },
-    3: { emoji: '🙂', label: 'Okay', color: 'text-yellow-500' },
-    4: { emoji: '😊', label: 'Good', color: 'text-lime-500' },
-    5: { emoji: '🌟', label: 'Thriving', color: 'text-emerald-500' }
+// Premium mood indicators (no emojis)
+const MoodLevels: Record<MoodLevel, { label: string; gradient: string; ring: string }> = {
+    1: { label: 'Struggling', gradient: 'from-rose-500 to-rose-600', ring: 'ring-rose-400' },
+    2: { label: 'Low', gradient: 'from-orange-400 to-amber-500', ring: 'ring-orange-300' },
+    3: { label: 'Neutral', gradient: 'from-slate-400 to-slate-500', ring: 'ring-slate-300' },
+    4: { label: 'Good', gradient: 'from-lime-400 to-emerald-500', ring: 'ring-lime-300' },
+    5: { label: 'Thriving', gradient: 'from-emerald-400 to-teal-500', ring: 'ring-emerald-300' }
+};
+
+// Premium SVG Icons for life areas
+const LifeAreaIcons = {
+    study: (
+        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <path d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+        </svg>
+    ),
+    sleep: (
+        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <path d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+        </svg>
+    ),
+    health: (
+        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <path d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+        </svg>
+    ),
+    social: (
+        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <path d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+        </svg>
+    ),
+    skills: (
+        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <path d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+        </svg>
+    ),
+    peace: (
+        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+        </svg>
+    )
 };
 
 export const LifeReview: React.FC = () => {
-    const { lifeReview, momentum, daily, logMood, submitLifeReview } = useWingsStore();
+    const { lifeReview, momentum, logMood, submitLifeReview } = useWingsStore();
     const today = getTodayISO();
 
     const [activeTab, setActiveTab] = useState<'mood' | 'balance' | 'weekly' | 'monthly' | 'insights'>('mood');
     const [reviewResponses, setReviewResponses] = useState<Record<number, string>>({});
     const [showReviewForm, setShowReviewForm] = useState(false);
 
-    // Life Balance areas with feeling-based values (stored in state, user can adjust)
+    // Life Balance areas with feeling-based values
     const [lifeBalance, setLifeBalance] = useState<Record<string, number>>({
-        study: 50,
-        sleep: 50,
-        health: 50,
-        social: 50,
-        skills: 50,
-        peace: 50
+        study: 50, sleep: 50, health: 50, social: 50, skills: 50, peace: 50
     });
 
     const LIFE_AREAS = [
-        { key: 'study', label: 'Study', emoji: '📚', color: 'bg-indigo-500' },
-        { key: 'sleep', label: 'Sleep', emoji: '😴', color: 'bg-violet-500' },
-        { key: 'health', label: 'Health', emoji: '💪', color: 'bg-emerald-500' },
-        { key: 'social', label: 'Social', emoji: '👥', color: 'bg-amber-500' },
-        { key: 'skills', label: 'Skills', emoji: '🎯', color: 'bg-rose-500' },
-        { key: 'peace', label: 'Mental Peace', emoji: '🧘', color: 'bg-cyan-500' }
+        { key: 'study', label: 'Study', gradient: 'from-indigo-500 to-violet-600' },
+        { key: 'sleep', label: 'Sleep', gradient: 'from-violet-500 to-purple-600' },
+        { key: 'health', label: 'Health', gradient: 'from-emerald-500 to-teal-600' },
+        { key: 'social', label: 'Social', gradient: 'from-amber-500 to-orange-600' },
+        { key: 'skills', label: 'Skills', gradient: 'from-rose-500 to-pink-600' },
+        { key: 'peace', label: 'Peace', gradient: 'from-cyan-500 to-sky-600' }
     ];
 
-    // Check if review is due
     const weekStart = getStartOfWeek();
     const monthStart = new Date(new Date().setDate(1)).toISOString().split('T')[0];
     const needsWeeklyReview = !lifeReview.lastWeeklyReview || lifeReview.lastWeeklyReview < weekStart;
     const needsMonthlyReview = !lifeReview.lastMonthlyReview || lifeReview.lastMonthlyReview < monthStart;
-
-    // Today's mood
     const todayMood = lifeReview.moodLog.find(m => m.date === today);
 
-    // Calculate insights
     const insights = useMemo(() => {
         const last7Days = lifeReview.moodLog.slice(-7);
-        const avgMood = last7Days.length > 0
-            ? last7Days.reduce((sum, m) => sum + m.mood, 0) / last7Days.length
-            : 3;
-
-        // Consistency from show-up history
+        const avgMood = last7Days.length > 0 ? last7Days.reduce((sum, m) => sum + m.mood, 0) / last7Days.length : 3;
         const showUpCount = momentum.showUpHistory.filter(Boolean).length;
         const consistency = Math.round((showUpCount / 7) * 100);
-
-        // Discipline (softer)
         const streakBonus = Math.min(momentum.currentStreak * 3, 30);
         const discipline = Math.min(100, consistency * 0.7 + streakBonus);
-
-        // Mood trend
         const firstHalf = last7Days.slice(0, Math.floor(last7Days.length / 2));
         const secondHalf = last7Days.slice(Math.floor(last7Days.length / 2));
         const firstAvg = firstHalf.length > 0 ? firstHalf.reduce((s, m) => s + m.mood, 0) / firstHalf.length : 3;
         const secondAvg = secondHalf.length > 0 ? secondHalf.reduce((s, m) => s + m.mood, 0) / secondHalf.length : 3;
         const trend = secondAvg > firstAvg ? 'up' : secondAvg < firstAvg ? 'down' : 'stable';
-
         return { avgMood, consistency, discipline, trend };
     }, [lifeReview.moodLog, momentum.showUpHistory, momentum.currentStreak]);
 
-    const handleMoodSelect = (mood: MoodLevel) => {
-        logMood(mood);
-    };
+    const handleMoodSelect = (mood: MoodLevel) => logMood(mood);
 
     const handleSubmitReview = (type: 'WEEKLY' | 'MONTHLY') => {
         const questions = type === 'WEEKLY' ? WEEKLY_QUESTIONS : MONTHLY_QUESTIONS;
-        const responses = questions.map((q, i) => ({
-            question: q,
-            answer: reviewResponses[i] || ''
-        }));
+        const responses = questions.map((q, i) => ({ question: q, answer: reviewResponses[i] || '' }));
         submitLifeReview(type, responses);
         setReviewResponses({});
         setShowReviewForm(false);
@@ -106,26 +118,35 @@ export const LifeReview: React.FC = () => {
 
     return (
         <div className="w-full max-w-lg space-y-8">
-            {/* Header */}
-            <div className="text-center space-y-2">
-                <h1 className="text-3xl font-extralight tracking-[0.3em] text-slate-400 uppercase">Life Review</h1>
-                <p className="text-[10px] text-slate-400 uppercase tracking-widest">Reflect. Adjust. Grow.</p>
+            {/* Premium Header */}
+            <div className="text-center space-y-3">
+                <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="inline-flex items-center space-x-2 px-4 py-1.5 bg-gradient-to-r from-indigo-500/10 to-violet-500/10 rounded-full border border-indigo-200/50"
+                >
+                    <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
+                    <span className="text-[10px] text-indigo-600 uppercase tracking-[0.3em] font-medium">Life Review</span>
+                </motion.div>
+                <p className="text-[10px] text-slate-400 uppercase tracking-widest">Reflect · Calibrate · Evolve</p>
             </div>
 
-            {/* Tabs */}
-            <div className="flex justify-center flex-wrap gap-2">
-                {(['mood', 'balance', 'insights', 'weekly', 'monthly'] as const).map(tab => (
-                    <button
-                        key={tab}
-                        onClick={() => setActiveTab(tab)}
-                        className={`px-4 py-2 text-[10px] uppercase tracking-widest font-bold rounded-xl transition-all ${activeTab === tab
-                            ? 'bg-indigo-600 text-white'
-                            : 'bg-white/50 text-slate-400 hover:bg-white/80'
-                            }`}
-                    >
-                        {tab === 'balance' ? 'Radar' : tab}
-                    </button>
-                ))}
+            {/* Premium Tabs */}
+            <div className="flex justify-center">
+                <div className="inline-flex p-1 bg-white/60 backdrop-blur-xl rounded-2xl border border-slate-200/50 shadow-lg shadow-slate-100/50">
+                    {(['mood', 'balance', 'insights', 'weekly', 'monthly'] as const).map(tab => (
+                        <button
+                            key={tab}
+                            onClick={() => setActiveTab(tab)}
+                            className={`px-5 py-2.5 text-[10px] uppercase tracking-widest font-semibold rounded-xl transition-all duration-300 ${activeTab === tab
+                                    ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-200'
+                                    : 'text-slate-500 hover:text-slate-700'
+                                }`}
+                        >
+                            {tab === 'balance' ? 'Radar' : tab}
+                        </button>
+                    ))}
+                </div>
             </div>
 
             <AnimatePresence mode="wait">
@@ -133,56 +154,81 @@ export const LifeReview: React.FC = () => {
                 {activeTab === 'mood' && (
                     <motion.div
                         key="mood"
-                        initial={{ opacity: 0, y: 10 }}
+                        initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        className="glass p-8 rounded-[2rem] space-y-8"
+                        exit={{ opacity: 0, y: -20 }}
+                        className="space-y-8"
                     >
-                        <div className="text-center space-y-2">
-                            <p className="text-slate-500 text-sm">How are you feeling today?</p>
-                            {todayMood && (
-                                <p className="text-[10px] text-indigo-500 uppercase tracking-widest">
-                                    Already logged: {MoodEmoji[todayMood.mood].label}
-                                </p>
-                            )}
-                        </div>
+                        <div className="glass p-10 rounded-[2.5rem] space-y-10 border border-white/50">
+                            <div className="text-center space-y-2">
+                                <h2 className="text-lg font-light text-slate-700 tracking-wide">How are you feeling?</h2>
+                                {todayMood && (
+                                    <p className="text-[10px] text-indigo-500 uppercase tracking-widest font-medium">
+                                        Logged: {MoodLevels[todayMood.mood].label}
+                                    </p>
+                                )}
+                            </div>
 
-                        <div className="flex justify-center space-x-4">
-                            {([1, 2, 3, 4, 5] as MoodLevel[]).map(mood => (
-                                <motion.button
-                                    key={mood}
-                                    whileHover={{ scale: 1.1 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    onClick={() => handleMoodSelect(mood)}
-                                    className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl transition-all ${todayMood?.mood === mood
-                                        ? 'bg-indigo-100 ring-2 ring-indigo-500'
-                                        : 'bg-white/50 hover:bg-white'
-                                        }`}
-                                >
-                                    {MoodEmoji[mood].emoji}
-                                </motion.button>
-                            ))}
-                        </div>
-
-                        {/* 7-Day Mood History */}
-                        <div className="pt-6 border-t border-slate-100 space-y-3">
-                            <p className="text-[10px] text-slate-400 uppercase tracking-widest text-center">Last 7 Days</p>
-                            <div className="flex justify-center space-x-2">
-                                {Array.from({ length: 7 }).map((_, i) => {
-                                    const d = new Date();
-                                    d.setDate(d.getDate() - (6 - i));
-                                    const dateStr = d.toISOString().split('T')[0];
-                                    const entry = lifeReview.moodLog.find(m => m.date === dateStr);
-                                    return (
-                                        <div key={i} className="flex flex-col items-center space-y-1">
-                                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm ${entry ? 'bg-white' : 'bg-slate-50'
-                                                }`}>
-                                                {entry ? MoodEmoji[entry.mood].emoji : '·'}
-                                            </div>
-                                            <span className="text-[8px] text-slate-300">{d.toLocaleDateString('en', { weekday: 'short' }).charAt(0)}</span>
+                            {/* Premium Mood Orbs */}
+                            <div className="flex justify-center space-x-4">
+                                {([1, 2, 3, 4, 5] as MoodLevel[]).map(mood => (
+                                    <motion.button
+                                        key={mood}
+                                        whileHover={{ scale: 1.15, y: -4 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={() => handleMoodSelect(mood)}
+                                        className={`relative w-14 h-14 rounded-2xl overflow-hidden transition-all duration-500 ${todayMood?.mood === mood ? `ring-2 ${MoodLevels[mood].ring} ring-offset-2` : ''
+                                            }`}
+                                    >
+                                        <div className={`absolute inset-0 bg-gradient-to-br ${MoodLevels[mood].gradient}`} />
+                                        <div className="absolute inset-0 flex items-center justify-center text-white/90 text-lg font-light">
+                                            {mood}
                                         </div>
-                                    );
-                                })}
+                                        {todayMood?.mood === mood && (
+                                            <motion.div
+                                                layoutId="selectedMood"
+                                                className="absolute inset-0 bg-white/20"
+                                            />
+                                        )}
+                                    </motion.button>
+                                ))}
+                            </div>
+
+                            <div className="flex justify-center space-x-8 text-[9px] text-slate-400 uppercase tracking-widest">
+                                <span>Struggling</span>
+                                <span>·</span>
+                                <span>Thriving</span>
+                            </div>
+
+                            {/* 7-Day History */}
+                            <div className="pt-8 border-t border-slate-100/50 space-y-4">
+                                <p className="text-[10px] text-slate-400 uppercase tracking-widest text-center">Last 7 Days</p>
+                                <div className="flex justify-center space-x-2">
+                                    {Array.from({ length: 7 }).map((_, i) => {
+                                        const d = new Date();
+                                        d.setDate(d.getDate() - (6 - i));
+                                        const dateStr = d.toISOString().split('T')[0];
+                                        const entry = lifeReview.moodLog.find(m => m.date === dateStr);
+                                        return (
+                                            <div key={i} className="flex flex-col items-center space-y-2">
+                                                <motion.div
+                                                    initial={{ scale: 0 }}
+                                                    animate={{ scale: 1 }}
+                                                    transition={{ delay: i * 0.05 }}
+                                                    className={`w-10 h-10 rounded-xl flex items-center justify-center text-xs font-medium transition-all ${entry
+                                                            ? `bg-gradient-to-br ${MoodLevels[entry.mood].gradient} text-white shadow-lg`
+                                                            : 'bg-slate-50 text-slate-300 border border-slate-100'
+                                                        }`}
+                                                >
+                                                    {entry ? entry.mood : '—'}
+                                                </motion.div>
+                                                <span className="text-[8px] text-slate-300 uppercase">
+                                                    {d.toLocaleDateString('en', { weekday: 'short' }).slice(0, 2)}
+                                                </span>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
                             </div>
                         </div>
                     </motion.div>
@@ -192,85 +238,102 @@ export const LifeReview: React.FC = () => {
                 {activeTab === 'balance' && (
                     <motion.div
                         key="balance"
-                        initial={{ opacity: 0, y: 10 }}
+                        initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        className="glass p-8 rounded-[2rem] space-y-8"
+                        exit={{ opacity: 0, y: -20 }}
+                        className="glass p-10 rounded-[2.5rem] space-y-10 border border-white/50"
                     >
                         <div className="text-center space-y-2">
-                            <h2 className="text-xl font-light text-slate-700">Life Balance Radar</h2>
-                            <p className="text-[10px] text-slate-400 uppercase tracking-widest">Which part of your life is collapsing?</p>
+                            <h2 className="text-lg font-light text-slate-700 tracking-wide">Life Balance Radar</h2>
+                            <p className="text-[10px] text-slate-400 uppercase tracking-widest">Which area needs attention?</p>
                         </div>
 
-                        {/* Visual Radar Wheel */}
-                        <div className="relative w-64 h-64 mx-auto">
-                            {/* Center circle */}
-                            <div className="absolute inset-0 flex items-center justify-center">
-                                <div className="w-16 h-16 rounded-full bg-white/80 flex items-center justify-center text-2xl shadow-inner">
-                                    🌟
-                                </div>
-                            </div>
+                        {/* Premium Hexagonal Radar */}
+                        <div className="relative w-72 h-72 mx-auto">
+                            {/* Concentric hexagons (background) */}
+                            <svg className="absolute inset-0 w-full h-full" viewBox="-150 -150 300 300">
+                                {[100, 66, 33].map(r => (
+                                    <polygon
+                                        key={r}
+                                        points={LIFE_AREAS.map((_, i) => {
+                                            const angle = (i * 60 - 90) * (Math.PI / 180);
+                                            return `${Math.cos(angle) * r},${Math.sin(angle) * r}`;
+                                        }).join(' ')}
+                                        fill="none"
+                                        stroke="#e2e8f0"
+                                        strokeWidth="1"
+                                        opacity={r === 100 ? 0.5 : 0.3}
+                                    />
+                                ))}
 
-                            {/* Radar segments */}
+                                {/* Value polygon */}
+                                <motion.polygon
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    points={LIFE_AREAS.map((area, i) => {
+                                        const angle = (i * 60 - 90) * (Math.PI / 180);
+                                        const r = (lifeBalance[area.key] / 100) * 100;
+                                        return `${Math.cos(angle) * r},${Math.sin(angle) * r}`;
+                                    }).join(' ')}
+                                    fill="url(#radarGradient)"
+                                    stroke="url(#radarStroke)"
+                                    strokeWidth="2"
+                                    opacity={0.8}
+                                />
+
+                                <defs>
+                                    <linearGradient id="radarGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stopColor="#6366f1" stopOpacity="0.3" />
+                                        <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0.3" />
+                                    </linearGradient>
+                                    <linearGradient id="radarStroke" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stopColor="#6366f1" />
+                                        <stop offset="100%" stopColor="#8b5cf6" />
+                                    </linearGradient>
+                                </defs>
+                            </svg>
+
+                            {/* Nodes */}
                             {LIFE_AREAS.map((area, i) => {
                                 const angle = (i * 60 - 90) * (Math.PI / 180);
+                                const r = (lifeBalance[area.key] / 100) * 100 + 20;
+                                const x = Math.cos(angle) * r + 144;
+                                const y = Math.sin(angle) * r + 144;
                                 const value = lifeBalance[area.key];
-                                const maxRadius = 100;
-                                const barLength = (value / 100) * maxRadius;
-                                const x = Math.cos(angle) * 40;
-                                const y = Math.sin(angle) * 40;
-                                const endX = Math.cos(angle) * (40 + barLength);
-                                const endY = Math.sin(angle) * (40 + barLength);
 
                                 return (
-                                    <div key={area.key} className="absolute" style={{ left: '50%', top: '50%' }}>
-                                        <motion.div
-                                            initial={{ scale: 0 }}
-                                            animate={{ scale: 1 }}
-                                            transition={{ delay: i * 0.1 }}
-                                            className="absolute"
-                                            style={{
-                                                left: endX,
-                                                top: endY,
-                                                transform: 'translate(-50%, -50%)'
-                                            }}
-                                        >
-                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-lg shadow-lg ${value > 60 ? 'bg-white' : value > 30 ? 'bg-amber-50' : 'bg-rose-50'}`}>
-                                                {area.emoji}
-                                            </div>
-                                        </motion.div>
-
-                                        {/* Bar connecting center to node */}
-                                        <svg className="absolute" style={{ left: 0, top: 0, overflow: 'visible' }}>
-                                            <motion.line
-                                                x1={x}
-                                                y1={y}
-                                                x2={endX}
-                                                y2={endY}
-                                                stroke={value > 60 ? '#10b981' : value > 30 ? '#f59e0b' : '#ef4444'}
-                                                strokeWidth={3}
-                                                strokeLinecap="round"
-                                                initial={{ pathLength: 0 }}
-                                                animate={{ pathLength: 1 }}
-                                                transition={{ delay: i * 0.1, duration: 0.5 }}
-                                            />
-                                        </svg>
-                                    </div>
+                                    <motion.div
+                                        key={area.key}
+                                        initial={{ scale: 0, opacity: 0 }}
+                                        animate={{ scale: 1, opacity: 1 }}
+                                        transition={{ delay: i * 0.1 }}
+                                        className="absolute"
+                                        style={{ left: x, top: y, transform: 'translate(-50%, -50%)' }}
+                                    >
+                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-lg transition-all ${value > 60 ? 'bg-gradient-to-br from-emerald-500 to-teal-600 text-white'
+                                                : value > 30 ? 'bg-gradient-to-br from-amber-400 to-orange-500 text-white'
+                                                    : 'bg-gradient-to-br from-rose-500 to-pink-600 text-white'
+                                            }`}>
+                                            {LifeAreaIcons[area.key as keyof typeof LifeAreaIcons]}
+                                        </div>
+                                    </motion.div>
                                 );
                             })}
                         </div>
 
-                        {/* Feeling-based sliders (no numbers shown) */}
-                        <div className="space-y-4 pt-6 border-t border-slate-100">
-                            <p className="text-[10px] text-slate-400 uppercase tracking-widest text-center">Adjust how each area feels</p>
+                        {/* Premium Sliders */}
+                        <div className="space-y-5 pt-8 border-t border-slate-100/50">
+                            <p className="text-[10px] text-slate-400 uppercase tracking-widest text-center">Adjust Your Balance</p>
                             {LIFE_AREAS.map(area => (
-                                <div key={area.key} className="flex items-center space-x-3">
-                                    <span className="text-lg w-8">{area.emoji}</span>
-                                    <span className="text-[10px] text-slate-500 uppercase tracking-wider w-20">{area.label}</span>
-                                    <div className="flex-1 relative">
-                                        <div className="h-3 bg-slate-100 rounded-full overflow-hidden">
+                                <div key={area.key} className="group flex items-center space-x-4">
+                                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center bg-gradient-to-br ${area.gradient} text-white shadow-sm`}>
+                                        {LifeAreaIcons[area.key as keyof typeof LifeAreaIcons]}
+                                    </div>
+                                    <span className="text-[11px] text-slate-600 uppercase tracking-wider w-16 font-medium">{area.label}</span>
+                                    <div className="flex-1 relative h-2">
+                                        <div className="absolute inset-0 bg-slate-100 rounded-full overflow-hidden">
                                             <motion.div
-                                                className={`h-full ${area.color} rounded-full`}
+                                                className={`h-full bg-gradient-to-r ${area.gradient} rounded-full`}
                                                 initial={{ width: 0 }}
                                                 animate={{ width: `${lifeBalance[area.key]}%` }}
                                                 transition={{ duration: 0.3 }}
@@ -285,14 +348,11 @@ export const LifeReview: React.FC = () => {
                                             className="absolute inset-0 w-full opacity-0 cursor-pointer"
                                         />
                                     </div>
-                                    <div className={`w-2 h-2 rounded-full ${lifeBalance[area.key] > 60 ? 'bg-emerald-500' : lifeBalance[area.key] > 30 ? 'bg-amber-500' : 'bg-rose-500'}`} />
+                                    <div className={`w-2 h-2 rounded-full transition-all ${lifeBalance[area.key] > 60 ? 'bg-emerald-500' : lifeBalance[area.key] > 30 ? 'bg-amber-500' : 'bg-rose-500'
+                                        }`} />
                                 </div>
                             ))}
                         </div>
-
-                        <p className="text-[9px] text-slate-300 text-center uppercase tracking-widest">
-                            Red = needs attention • Amber = okay • Green = thriving
-                        </p>
                     </motion.div>
                 )}
 
@@ -300,57 +360,74 @@ export const LifeReview: React.FC = () => {
                 {activeTab === 'insights' && (
                     <motion.div
                         key="insights"
-                        initial={{ opacity: 0, y: 10 }}
+                        initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
+                        exit={{ opacity: 0, y: -20 }}
                         className="space-y-6"
                     >
-                        {/* Consistency Score */}
-                        <div className="glass p-6 rounded-[2rem] space-y-4">
+                        {/* Consistency */}
+                        <div className="glass p-8 rounded-[2rem] space-y-5 border border-white/50">
                             <div className="flex justify-between items-center">
-                                <span className="text-[10px] text-slate-400 uppercase tracking-widest">Study Consistency</span>
-                                <span className="text-2xl font-light text-slate-700">{insights.consistency}%</span>
+                                <div className="space-y-1">
+                                    <span className="text-[10px] text-slate-400 uppercase tracking-widest">Study Consistency</span>
+                                    <p className="text-[9px] text-slate-300">Days with completed rules</p>
+                                </div>
+                                <div className="text-right">
+                                    <span className="text-3xl font-extralight text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-violet-500">
+                                        {insights.consistency}
+                                    </span>
+                                    <span className="text-lg text-slate-300 ml-1">%</span>
+                                </div>
                             </div>
                             <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
                                 <motion.div
                                     initial={{ width: 0 }}
                                     animate={{ width: `${insights.consistency}%` }}
-                                    className="h-full bg-indigo-500 rounded-full"
+                                    className="h-full bg-gradient-to-r from-indigo-500 to-violet-500 rounded-full"
                                 />
                             </div>
-                            <p className="text-[9px] text-slate-400">Days with completed rules this week</p>
                         </div>
 
                         {/* Mood Trend */}
-                        <div className="glass p-6 rounded-[2rem] space-y-4">
+                        <div className="glass p-8 rounded-[2rem] space-y-5 border border-white/50">
                             <div className="flex justify-between items-center">
-                                <span className="text-[10px] text-slate-400 uppercase tracking-widest">Mood Trend</span>
-                                <span className={`text-xl ${insights.trend === 'up' ? 'text-emerald-500' :
-                                    insights.trend === 'down' ? 'text-rose-400' : 'text-slate-400'
+                                <div className="space-y-1">
+                                    <span className="text-[10px] text-slate-400 uppercase tracking-widest">Mood Trend</span>
+                                    <p className="text-[9px] text-slate-300">Comparing first vs second half</p>
+                                </div>
+                                <div className={`text-xl font-light ${insights.trend === 'up' ? 'text-emerald-500' : insights.trend === 'down' ? 'text-rose-400' : 'text-slate-400'
                                     }`}>
-                                    {insights.trend === 'up' ? '↗ Improving' : insights.trend === 'down' ? '↘ Dipping' : '→ Stable'}
-                                </span>
+                                    {insights.trend === 'up' ? '↗ Rising' : insights.trend === 'down' ? '↘ Dipping' : '→ Stable'}
+                                </div>
                             </div>
-                            <div className="flex items-center space-x-2">
-                                <span className="text-3xl">{MoodEmoji[Math.round(insights.avgMood) as MoodLevel]?.emoji || '🙂'}</span>
-                                <span className="text-sm text-slate-500">Average mood: {insights.avgMood.toFixed(1)}/5</span>
+                            <div className="flex items-center space-x-4">
+                                <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${MoodLevels[Math.round(insights.avgMood) as MoodLevel]?.gradient || 'from-slate-400 to-slate-500'} flex items-center justify-center text-white text-lg font-light shadow-lg`}>
+                                    {Math.round(insights.avgMood)}
+                                </div>
+                                <span className="text-sm text-slate-500">Average mood this week</span>
                             </div>
                         </div>
 
-                        {/* Discipline Score */}
-                        <div className="glass p-6 rounded-[2rem] space-y-4">
+                        {/* Discipline */}
+                        <div className="glass p-8 rounded-[2rem] space-y-5 border border-white/50">
                             <div className="flex justify-between items-center">
-                                <span className="text-[10px] text-slate-400 uppercase tracking-widest">Discipline Score</span>
-                                <span className="text-2xl font-light text-slate-700">{Math.round(insights.discipline)}</span>
+                                <div className="space-y-1">
+                                    <span className="text-[10px] text-slate-400 uppercase tracking-widest">Discipline Score</span>
+                                    <p className="text-[9px] text-slate-300">Showing up + streak bonus</p>
+                                </div>
+                                <div className="text-right">
+                                    <span className="text-3xl font-extralight text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-500">
+                                        {Math.round(insights.discipline)}
+                                    </span>
+                                </div>
                             </div>
                             <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
                                 <motion.div
                                     initial={{ width: 0 }}
                                     animate={{ width: `${insights.discipline}%` }}
-                                    className="h-full bg-emerald-500 rounded-full"
+                                    className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full"
                                 />
                             </div>
-                            <p className="text-[9px] text-slate-400">Soft metric: showing up + streak bonus</p>
                         </div>
                     </motion.div>
                 )}
@@ -359,22 +436,27 @@ export const LifeReview: React.FC = () => {
                 {activeTab === 'weekly' && (
                     <motion.div
                         key="weekly"
-                        initial={{ opacity: 0, y: 10 }}
+                        initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        className="glass p-8 rounded-[2rem] space-y-6"
+                        exit={{ opacity: 0, y: -20 }}
+                        className="glass p-10 rounded-[2.5rem] space-y-8 border border-white/50"
                     >
                         {needsWeeklyReview && !showReviewForm ? (
-                            <div className="text-center space-y-6">
-                                <div className="w-16 h-16 mx-auto rounded-full bg-amber-50 flex items-center justify-center">
-                                    <span className="text-2xl">📝</span>
+                            <div className="text-center space-y-8">
+                                <div className="w-20 h-20 mx-auto rounded-3xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-200">
+                                    <svg className="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                                        <path d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                                    </svg>
                                 </div>
-                                <p className="text-slate-600">Time for your weekly reflection.</p>
+                                <div className="space-y-2">
+                                    <h3 className="text-lg font-light text-slate-700">Weekly Reflection</h3>
+                                    <p className="text-sm text-slate-400">Take a moment to review your week</p>
+                                </div>
                                 <motion.button
                                     whileHover={{ scale: 1.02 }}
                                     whileTap={{ scale: 0.98 }}
                                     onClick={() => setShowReviewForm(true)}
-                                    className="px-8 py-3 bg-indigo-600 text-white text-[10px] uppercase tracking-widest font-bold rounded-xl"
+                                    className="px-10 py-4 bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-[11px] uppercase tracking-[0.2em] font-semibold rounded-2xl shadow-lg shadow-indigo-200"
                                 >
                                     Start Review
                                 </motion.button>
@@ -383,11 +465,11 @@ export const LifeReview: React.FC = () => {
                             <div className="space-y-6">
                                 {WEEKLY_QUESTIONS.map((q, i) => (
                                     <div key={i} className="space-y-2">
-                                        <label className="text-sm text-slate-600">{q}</label>
+                                        <label className="text-sm text-slate-600 font-medium">{q}</label>
                                         <textarea
                                             value={reviewResponses[i] || ''}
                                             onChange={e => setReviewResponses({ ...reviewResponses, [i]: e.target.value })}
-                                            className="w-full p-3 bg-white/50 border border-slate-100 rounded-xl text-sm resize-none focus:outline-none focus:ring-1 focus:ring-indigo-200"
+                                            className="w-full p-4 bg-white/60 border border-slate-200/50 rounded-2xl text-sm resize-none focus:outline-none focus:ring-2 focus:ring-indigo-200 transition-all"
                                             rows={2}
                                         />
                                     </div>
@@ -396,16 +478,20 @@ export const LifeReview: React.FC = () => {
                                     whileHover={{ scale: 1.02 }}
                                     whileTap={{ scale: 0.98 }}
                                     onClick={() => handleSubmitReview('WEEKLY')}
-                                    className="w-full py-4 bg-indigo-600 text-white text-[10px] uppercase tracking-widest font-bold rounded-xl"
+                                    className="w-full py-4 bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-[11px] uppercase tracking-widest font-semibold rounded-2xl shadow-lg"
                                 >
-                                    Submit Weekly Review
+                                    Submit
                                 </motion.button>
                             </div>
                         ) : (
-                            <div className="text-center space-y-4">
-                                <span className="text-3xl">✅</span>
-                                <p className="text-slate-500">Weekly review completed.</p>
-                                <p className="text-[10px] text-slate-400">Last reviewed: {lifeReview.lastWeeklyReview}</p>
+                            <div className="text-center space-y-4 py-8">
+                                <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg">
+                                    <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                        <path d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </div>
+                                <p className="text-slate-500">Weekly review completed</p>
+                                <p className="text-[10px] text-slate-300 uppercase tracking-widest">{lifeReview.lastWeeklyReview}</p>
                             </div>
                         )}
                     </motion.div>
@@ -415,22 +501,27 @@ export const LifeReview: React.FC = () => {
                 {activeTab === 'monthly' && (
                     <motion.div
                         key="monthly"
-                        initial={{ opacity: 0, y: 10 }}
+                        initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        className="glass p-8 rounded-[2rem] space-y-6"
+                        exit={{ opacity: 0, y: -20 }}
+                        className="glass p-10 rounded-[2.5rem] space-y-8 border border-white/50"
                     >
                         {needsMonthlyReview && !showReviewForm ? (
-                            <div className="text-center space-y-6">
-                                <div className="w-16 h-16 mx-auto rounded-full bg-indigo-50 flex items-center justify-center">
-                                    <span className="text-2xl">📊</span>
+                            <div className="text-center space-y-8">
+                                <div className="w-20 h-20 mx-auto rounded-3xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-200">
+                                    <svg className="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                                        <path d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                                    </svg>
                                 </div>
-                                <p className="text-slate-600">Take a moment for your monthly review.</p>
+                                <div className="space-y-2">
+                                    <h3 className="text-lg font-light text-slate-700">Monthly Reflection</h3>
+                                    <p className="text-sm text-slate-400">A deeper look at your progress</p>
+                                </div>
                                 <motion.button
                                     whileHover={{ scale: 1.02 }}
                                     whileTap={{ scale: 0.98 }}
                                     onClick={() => setShowReviewForm(true)}
-                                    className="px-8 py-3 bg-indigo-600 text-white text-[10px] uppercase tracking-widest font-bold rounded-xl"
+                                    className="px-10 py-4 bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-[11px] uppercase tracking-[0.2em] font-semibold rounded-2xl shadow-lg shadow-indigo-200"
                                 >
                                     Start Review
                                 </motion.button>
@@ -439,11 +530,11 @@ export const LifeReview: React.FC = () => {
                             <div className="space-y-6">
                                 {MONTHLY_QUESTIONS.map((q, i) => (
                                     <div key={i} className="space-y-2">
-                                        <label className="text-sm text-slate-600">{q}</label>
+                                        <label className="text-sm text-slate-600 font-medium">{q}</label>
                                         <textarea
                                             value={reviewResponses[i] || ''}
                                             onChange={e => setReviewResponses({ ...reviewResponses, [i]: e.target.value })}
-                                            className="w-full p-3 bg-white/50 border border-slate-100 rounded-xl text-sm resize-none focus:outline-none focus:ring-1 focus:ring-indigo-200"
+                                            className="w-full p-4 bg-white/60 border border-slate-200/50 rounded-2xl text-sm resize-none focus:outline-none focus:ring-2 focus:ring-indigo-200 transition-all"
                                             rows={2}
                                         />
                                     </div>
@@ -452,16 +543,20 @@ export const LifeReview: React.FC = () => {
                                     whileHover={{ scale: 1.02 }}
                                     whileTap={{ scale: 0.98 }}
                                     onClick={() => handleSubmitReview('MONTHLY')}
-                                    className="w-full py-4 bg-indigo-600 text-white text-[10px] uppercase tracking-widest font-bold rounded-xl"
+                                    className="w-full py-4 bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-[11px] uppercase tracking-widest font-semibold rounded-2xl shadow-lg"
                                 >
-                                    Submit Monthly Review
+                                    Submit
                                 </motion.button>
                             </div>
                         ) : (
-                            <div className="text-center space-y-4">
-                                <span className="text-3xl">✅</span>
-                                <p className="text-slate-500">Monthly review completed.</p>
-                                <p className="text-[10px] text-slate-400">Last reviewed: {lifeReview.lastMonthlyReview}</p>
+                            <div className="text-center space-y-4 py-8">
+                                <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg">
+                                    <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                        <path d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </div>
+                                <p className="text-slate-500">Monthly review completed</p>
+                                <p className="text-[10px] text-slate-300 uppercase tracking-widest">{lifeReview.lastMonthlyReview}</p>
                             </div>
                         )}
                     </motion.div>
