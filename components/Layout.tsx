@@ -85,8 +85,8 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentView, onChangeV
 
       <nav className="mb-10 px-4 py-2 glass rounded-3xl flex items-center space-x-1">
 
-        {/* Back Button */}
-        {canGoBack && onGoBack && (
+        {/* Back Button - shows when not on Flight Deck or when there's history */}
+        {(currentView !== 'FLIGHT' || canGoBack) && onGoBack && (
           <button
             onClick={onGoBack}
             className="p-3 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-white/40 transition-all mr-2"

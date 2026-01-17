@@ -33,6 +33,9 @@ function App() {
       const prevView = viewHistory[viewHistory.length - 1];
       setViewHistory(prev => prev.slice(0, -1));
       setCurrentView(prevView);
+    } else {
+      // No history, go back to Flight Deck
+      setCurrentView('FLIGHT');
     }
   };
 
